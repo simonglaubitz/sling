@@ -24,7 +24,7 @@
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
         <version>24</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.launchpad.base</artifactId>
@@ -32,7 +32,7 @@
        This version is a concatenation of the framework version and a version for the launchpad base itself.
        For a release only the qualifier (launchpad base version) is increased.
      -->
-    <version>5.0.1-2.6.3-SNAPSHOT</version>
+    <version>5.2.0-2.6.5-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Apache Sling Launchpad Base</name>
@@ -40,10 +40,6 @@
         This module contains the common classes and configuration files used
         by the various launchpad modules..
     </description>
-
-    <properties>
-        <felix.httpservice.version>2.3.2</felix.httpservice.version>
-    </properties>
 
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/sling/trunk/launchpad/base</connection>
@@ -105,7 +101,7 @@
                         <Export-Package>!*</Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Embed-Dependency>
-                            org.apache.felix.framework;inline=org/**|META-INF/**,
+                            org.apache.felix.framework;inline=org/**|META-INF/**|default.properties,
                             org.apache.felix.http.proxy;inline=org/apache/**,
                             org.apache.sling.launchpad.api;inline=org/apache/sling/launchpad/api/**
                         </Embed-Dependency>
@@ -257,7 +253,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>5.0.1</version>
+            <version>5.2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -269,19 +265,19 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.http.proxy</artifactId>
-            <version>${felix.httpservice.version}</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.http.bridge</artifactId>
-            <version>${felix.httpservice.version}</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

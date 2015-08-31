@@ -45,7 +45,6 @@ import org.apache.sling.commons.threads.ThreadPool;
 import org.apache.sling.commons.threads.ThreadPoolManager;
 import org.apache.sling.validation.Validator;
 import org.apache.sling.validation.impl.Constants;
-import org.apache.sling.validation.impl.ValidationModelRetrieverImpl;
 import org.apache.sling.validation.impl.model.ChildResourceImpl;
 import org.apache.sling.validation.impl.model.ParameterizedValidatorImpl;
 import org.apache.sling.validation.impl.model.ResourcePropertyImpl;
@@ -70,8 +69,7 @@ import org.slf4j.LoggerFactory;
 @Component
 public class ResourceValidationModelProviderImpl implements ValidationModelProvider, EventHandler {
 
-    static final String MODEL_XPATH_QUERY = "/jcr:root%s/" + Constants.MODELS_HOME
-            + "/*[@sling:resourceType=\"%s\" and @%s=\"%s\"]";
+    static final String MODEL_XPATH_QUERY = "/jcr:root%s/*[@sling:resourceType=\""+Constants.VALIDATION_MODEL_RESOURCE_TYPE+"\" and @"+Constants.VALIDATED_RESOURCE_TYPE+"=\"%s\"]";
     static final String[] TOPICS = { SlingConstants.TOPIC_RESOURCE_REMOVED, SlingConstants.TOPIC_RESOURCE_CHANGED,
             SlingConstants.TOPIC_RESOURCE_ADDED };
 
@@ -81,7 +79,7 @@ public class ResourceValidationModelProviderImpl implements ValidationModelProvi
     @Reference
     private ValidationModelCache cache;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ValidationModelRetrieverImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResourceValidationModelProviderImpl.class);
 
     @Reference
     private ThreadPoolManager tpm = null;
@@ -187,12 +185,11 @@ public class ResourceValidationModelProviderImpl implements ValidationModelProvi
         Collection<ValidationModel> validationModels = new ArrayList<ValidationModel>();
         String[] searchPaths = resourceResolver.getSearchPath();
         for (String searchPath : searchPaths) {
-            final String queryString = String.format(MODEL_XPATH_QUERY, searchPath,
-                    Constants.VALIDATION_MODEL_RESOURCE_TYPE, Constants.VALIDATED_RESOURCE_TYPE, relativeResourceType);
+            final String queryString = String.format(MODEL_XPATH_QUERY, searchPath, relativeResourceType);
             Iterator<Resource> models = resourceResolver.findResources(queryString, "xpath");
             while (models.hasNext()) {
                 Resource model = models.next();
-                LOG.info("Found validation model resource {}.", model.getPath());
+                LOG.debug("Found validation model resource {}.", model.getPath());
                 String jcrPath = model.getPath();
                 try {
                     ValueMap validationModelProperties = model.adaptTo(ValueMap.class);

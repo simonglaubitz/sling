@@ -166,12 +166,13 @@ public class DependencyLifecycleParticipant extends AbstractMavenLifecyclePartic
         // we have to create an effective model to add the dependencies
         final Model effectiveModel = ModelUtility.getEffectiveModel(info.localModel, resolverOptions);
 
-        final List<Model> dependencies = searchSlingstartDependencies(env, info, effectiveModel);
+        final List<Model> dependencies = searchSlingstartDependencies(env, info, info.localModel, effectiveModel);
         info.model = new Model();
         for(final Model d : dependencies) {
             ModelUtility.merge(info.model, d);
         }
-        ModelUtility.merge(info.model, effectiveModel);
+        ModelUtility.merge(info.model, info.localModel);
+        info.localModel = info.model;
         info.model = ModelUtility.getEffectiveModel(info.model, resolverOptions);
 
         final Map<Traceable, String> errors = ModelUtility.validate(info.model);
@@ -254,6 +255,7 @@ public class DependencyLifecycleParticipant extends AbstractMavenLifecyclePartic
     private static List<Model> searchSlingstartDependencies(
             final Environment env,
             final ProjectInfo info,
+            final Model rawModel,
             final Model effectiveModel)
     throws MavenExecutionException {
         // slingstart or slingfeature
@@ -331,6 +333,16 @@ public class DependencyLifecycleParticipant extends AbstractMavenLifecyclePartic
                     }
                     for(final org.apache.sling.provisioning.model.Artifact r : removeList) {
                         group.remove(r);
+                        final Feature localModelFeature = rawModel.getFeature(feature.getName());
+                        if ( localModelFeature != null ) {
+                            final RunMode localRunMode = localModelFeature.getRunMode(runMode.getNames());
+                            if ( localRunMode != null ) {
+                                final ArtifactGroup localAG = localRunMode.getArtifactGroup(group.getStartLevel());
+                                if ( localAG != null ) {
+                                    localAG.remove(r);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -346,15 +358,14 @@ public class DependencyLifecycleParticipant extends AbstractMavenLifecyclePartic
         // we have to create an effective model to add the dependencies
         final Model effectiveModel = ModelUtility.getEffectiveModel(rawModel, new ResolverOptions());
 
-        final List<Model> dependencies = searchSlingstartDependencies(env, info, effectiveModel);
+        final List<Model> dependencies = searchSlingstartDependencies(env, info, rawModel, effectiveModel);
         Model mergingModel = new Model();
         for(final Model d : dependencies) {
             ModelUtility.merge(mergingModel, d);
         }
-        ModelUtility.merge(mergingModel, effectiveModel);
-        mergingModel = ModelUtility.getEffectiveModel(mergingModel, new ResolverOptions());
+        ModelUtility.merge(mergingModel, rawModel);
 
-        final Map<Traceable, String> errors = ModelUtility.validate(mergingModel);
+        final Map<Traceable, String> errors = ModelUtility.validate(ModelUtility.getEffectiveModel(mergingModel, new ResolverOptions()));
         if ( errors != null ) {
             throw new MavenExecutionException("Unable to create model file for " + dep + " : " + errors, (File)null);
         }

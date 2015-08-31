@@ -24,9 +24,15 @@ import javax.script.Bindings;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.scripting.sightly.pojo.Use;
 
 public class Test implements Use {
+
+    public static final String PROPERTIES = "properties";
+    public static final String TEXT = "text";
+    public static final String TAG = "tag";
+    public static final String INCLUDE_CHIDLREN = "includeChildren";
 
     private String text = null;
 
@@ -37,29 +43,16 @@ public class Test implements Use {
     private Iterator<Resource> children = null;
 
     public void init(Bindings bindings) {
-        Resource resource = (Resource)bindings.get("resource");
-        ValueMap properties = (ValueMap)bindings.get("properties");
+        Resource resource = (Resource)bindings.get(SlingBindings.RESOURCE);
+        ValueMap properties = (ValueMap)bindings.get(PROPERTIES);
 
         if (properties != null) {
-            Object text = properties.get("text");
-            if (text != null) {
-                this.text = text.toString();
+            text = properties.get(TEXT, resource.getPath());
+            tag = properties.get(TAG, String.class);
+            includeChildren = properties.get(INCLUDE_CHIDLREN, false);
+            if (includeChildren) {
+                children = resource.listChildren();
             }
-
-            Object tag = properties.get("tag");
-            if (tag != null) {
-                this.tag = tag.toString();
-            }
-
-            Object includeChildren = properties.get("includeChildren");
-            if (includeChildren != null) {
-                this.includeChildren = Boolean.parseBoolean(includeChildren.toString());
-                this.children = resource.listChildren();
-            }
-        }
-
-        if (this.text == null) {
-            this.text = resource.getPath();
         }
     }
 
